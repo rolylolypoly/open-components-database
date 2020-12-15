@@ -1,0 +1,129 @@
+; script for generating sanity checks in OCDB by compiling all PCB components
+defpackage ocdb/gen-tests:
+  import core
+  import collections
+  import pcre
+
+val ignored-paths = [
+  "./designs",
+  "./doc",
+  "./tests",
+  "./style-guide"
+  "./ocdb.stanza"
+  "./scripts"
+]
+
+defstruct Package:
+  path:String
+  pkg-name:String
+  components:Tuple<String>,
+  modules:Tuple<String>
+
+defmethod print (o:OutputStream, p:Package):
+  print(o, "package \'%_\' defined in %_ contains: " % [pkg-name(p) path(p)])
+  do(lnprint{IndentedStream(o), "component: %_" % [_]}, components(p))
+  do(lnprint{IndentedStream(o), "module: %_" % [_]}, modules(p))
+
+defn strip (prefix:String, string:String) -> String:
+  if empty?(string):
+    string
+  else:
+    replace{_, " ", ""} $
+    replace{_, ":", ""} $
+    replace{_, prefix, ""} $
+      string
+
+defn strip (string:String, sequence:Seqable<String>):
+  seq(strip{string, _} sequence)
+
+;todo: precompile regular expressions
+defn extract (item, contents):
+  val regex = to-string $
+    "(public\\s+)?(unique\\s+)?%_\\s+\\S*\\s*:" % [item]
+  val matches = 
+    for line in split(contents, "\n") seq?:
+      if prefix?(line, " "): None()
+      else:
+        val matches? = regex-match(regex, line)
+        if not empty?(matches?):
+          if length(matches?) == 1: 
+            One(matches?[0])
+          else: 
+            var all = matches?[0]
+            for i in 1 to length(matches?) do: 
+              all = replace(all, matches?[i], "")
+            One(all)
+        else:
+          None()
+  strip{item, _} $ matches
+
+defn collect (path:String) -> Seq<Package>:
+  val package-list = Vector<Package>()
+  defn* driver (path:String):  
+    println("extracting top level components and modules from %_ ..." % [path])
+    if not contains?(ignored-paths, path): 
+      if file-type(path) is DirectoryType:
+        for child in dir-files(path) do:
+          driver(to-string("%_/%_" % [path, child]))
+      else if suffix?(path, ".stanza"):
+        val complete-path = resolve-path(path) as String
+        val contents   = slurp(complete-path)
+        val components = extract("pcb-component", contents)
+        val modules    = extract("pcb-module", contents)
+        val packages   = to-tuple $ extract("defpackage", contents) 
+        
+        if length(packages) > 1: 
+          println("[%,]" % [packages])
+          throw(Exception("more than one package found"))
+        else if length(packages) == 1:
+          if not empty?(modules) or not empty?(components):
+            add(package-list, Package(complete-path, packages[0], to-tuple(components), to-tuple(modules)))
+
+  driver(path)
+  to-seq(package-list)
+
+val HEADER = \<S>
+#use-added-syntax(esir)
+defpackage ocdb/test:
+  import core
+  import collections
+  import math
+  import esir
+  import esir/utils
+  import esir/gen
+  import esir/repl-lib
+  import ocdb/tests/default-harness
+  import ocdb/land-patterns
+  import ocdb/generic-components
+<S>
+
+val BODY = \<S> 
+pcb-module test-module:<S>
+
+val FOOTER = \<S> 
+pcb-design main:
+  module: test-module
+let: 
+  val _ = fully-concretize() as Collection<TStmt>  
+<S>
+
+val COUNT = to-seq(1 to false)
+defn unique-inst (): 
+  to-string("inst%_" % [next(COUNT)])
+
+defn generate-tests (packages:Seq<Package>):
+  val header = StringBuffer()
+  val body   = StringBuffer()
+  print(header, HEADER)
+  print(body, BODY)
+
+  for package in packages do: 
+    lnprint(IndentedStream(header), "import %_" % [pkg-name(package)])
+    for component in cat-all([components(package), modules(package)]) do:
+      lnprint(IndentedStream(body), "inst %_: %_/%_" %[unique-inst(), pkg-name(package), component])
+  
+  val os = StringBuffer()
+  print(os, "%_%_%_" % [to-string(header) to-string(body) to-string(FOOTER)])
+  to-string(os)
+
+println(generate-tests $ collect("."))
