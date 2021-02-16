@@ -24,6 +24,19 @@ public defstruct VoltageDividerSolution :
   r2: Resistor
   vo: [Double, Double, Double]
 
+defmethod print (o:OutputStream, s:VoltageDividerSolution) :
+  val items = [
+    "r1 = %_" % [r1(s)]
+    "r2 = %_" % [r2(s)]
+    "vo = %_" % [vo(s)]]
+  print(o, "VoltageDividerSolution(%_)" % [indented-list(items)])
+
+defn indented-list (items:Seqable) :
+  new Printable :
+    defmethod print (o:OutputStream, this) :
+      val o2 = IndentedStream(o)
+      do(lnprint{o2, _}, items)
+
 ;======================================================
 ;==================== Esir API ========================
 ;======================================================
