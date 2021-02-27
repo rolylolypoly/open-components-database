@@ -132,14 +132,14 @@ set-design("ble-mote")
 make-default-board(sensor-mote*, 4, 30.0, 18.0)
 
 ; Show the Schematic and PCB for the design
-; view-board()
+view-board()
 view-schematic()
 
 ; Export CAD
-; set-export-board?(true)
-; set-export-schematic?(true)
-; set-export-backend(`kicad)
-; export-cad()
+set-export-board?(true)
+set-export-schematic?(true)
+set-export-backend(`kicad)
+export-cad()
 
 ; Solve and export Bill of Materials
-; export-bom()
+export-bom()
