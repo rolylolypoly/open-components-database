@@ -452,7 +452,8 @@ public defn attach-programming-connector (proc:JITXObject, vio:JITXObject, intf:
 ; ================== Testpoint functions =================
 ; ========================================================
 
-public defn add-testpoint (rs:Tuple<JITXObject>, method:String) :
+public defn add-testpoint (rs:Tuple<JITXObject>, method:String) -> Tuple<JITXObject> :
+  val tps = Vector<JITXObject>()
   inside pcb-module :
     for r in rs do :
       if method == "pth-loop" :
@@ -461,16 +462,22 @@ public defn add-testpoint (rs:Tuple<JITXObject>, method:String) :
         ;   color = "black"
         inst tp : ocdb/keystone/500xx/component(color)
         net (tp.p, r)
+        add(tps, tp)
       else if method == "smd-loop" :
         inst tp : ocdb/te-connectivity/RC/component
+        ; schematic-group(tp) = g-sg-2
+        ; layout-group(tp) = g-sg-2
+        add(tps, tp)
         net (tp.p, r)
       else if method == "smd-pad" :
         inst tp : gen-testpad(2.0)
         net (tp.p, r)
+        add(tps, tp)
       else :
         fatal("Unsupported add-testpoint method.")
+  to-tuple(tps)
 
-public defn add-testpoint (rs:Tuple<JITXObject>) :
+public defn add-testpoint (rs:Tuple<JITXObject>) -> Tuple<JITXObject> :
   add-testpoint(rs, "pth-loop")
 
 public pcb-component gen-testpad (d:Double) :
@@ -617,7 +624,7 @@ public pcb-module inverted-f-antenna :
 ; 4 - 10 mcd for indoor
 
 ; Adds an RGB led to a processor using PWM pins
-public defn add-rgb-indicator (brightness:Double, proc:JITXObject, vin:JITXObject):
+public defn add-rgb-indicator (brightness:Double, proc:JITXObject, vin:JITXObject) -> Tuple<Instance> : 
   inside pcb-module:
     val vio = 3.3 ; TODO: get this from the vin pin property
     ; Calculate resistance to get appropriate brightness
@@ -627,7 +634,8 @@ public defn add-rgb-indicator (brightness:Double, proc:JITXObject, vin:JITXObjec
     
     public inst led : ocdb/foshan-optoelectronics/FM-B2020RGBA-HG/component ; TODO: make generic
     require pwm:pwm[3] from proc
-    res-strap(pwm[0].pwm, led.l.r, calc-r(led.l.r, brightness, vio))
-    res-strap(pwm[1].pwm, led.l.g, calc-r(led.l.g, brightness, vio))
-    res-strap(pwm[2].pwm, led.l.b, calc-r(led.l.b, brightness, vio))
+    val r1 = res-strap(pwm[0].pwm, led.l.r, calc-r(led.l.r, brightness, vio))
+    val r2 = res-strap(pwm[1].pwm, led.l.g, calc-r(led.l.g, brightness, vio))
+    val r3 = res-strap(pwm[2].pwm, led.l.b, calc-r(led.l.b, brightness, vio))
     net (vin, led.l.a)
+    [led, r1, r2, r3]

@@ -22,14 +22,14 @@ public defn esd-clamp (bundle:JITXObject, gnd:JITXObject) :
           net (clamp.c[1] bundle.canh)
           net (clamp.c[2] bundle.canl)
           net (clamp.common gnd)
-          bundle
+          [bundle, clamp]
         ; ESD clamp and power protection for usb
         else if pb == usb-2 :
           inst clamp : ocdb/texas-instruments/TPD3S0x4/module
           net (bundle, clamp.usb-in)
           net (clamp.usb-in.vbus.vdd, clamp.en)
           ; Return protected port
-          clamp.usb-out
+          [clamp.usb-out, clamp]
 
 ; Isolate unidirectional digital logic pins, associated with power domains A and B. B considered to be distal from A
 public defn isolate-logic (pins:Tuple<[JITXObject JITXObject]>, pwr-A:JITXObject, pwr-B:JITXObject):
