@@ -310,7 +310,7 @@ defmethod to-esir (capacitor: Capacitor) -> Instantiable :
 
       match(case: String) :
         if all?(digit?, to-seq(case)) :
-          val pkg = ipc-two-pin-landpattern(case)
+          val pkg = ipc-two-pin-pol-landpattern(case)
           landpattern = pkg(a => pkg.a, c => pkg.c)
         else :
           val pkg = dummy-landpattern(2, [x(capacitor) y(capacitor)])
