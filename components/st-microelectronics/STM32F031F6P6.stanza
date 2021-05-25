@@ -15,6 +15,7 @@ defpackage ocdb/st-microelectronics/STM32F031F6P6 :
   import ocdb/box-symbol
   import ocdb/property-structs
   import ocdb/st-microelectronics/stm-api
+  import ocdb/components/STM32F031F_4-6_Px/supports
 
 public pcb-component component :
   manufacturer = "STMicroelectronics"
@@ -46,139 +47,7 @@ public pcb-component component :
 
   assign-landpattern(sop65-landpattern(20, 6.4))
   make-box-symbol()
-  supports swd:
-    swd.swdio  => self.PA[13]
-    swd.swdclk => self.PA[14]
-
-  supports gpio:
-    gpio.gpio => self.PF[0]
-
-  supports gpio:
-    gpio.gpio => self.PF[1]
-
-  supports gpio:
-    gpio.gpio => self.PA[0]
-
-  supports gpio:
-    gpio.gpio => self.PA[1]
-
-  supports gpio:
-    gpio.gpio => self.PA[2]
-
-  supports gpio:
-    gpio.gpio => self.PA[3]
-
-  supports gpio:
-    gpio.gpio => self.PA[4]
-
-  supports gpio:
-    gpio.gpio => self.PA[5]
-
-  supports gpio:
-    gpio.gpio => self.PA[6]
-
-  supports gpio:
-    gpio.gpio => self.PA[7]
-
-  supports gpio:
-    gpio.gpio => self.PB[1]
-
-  supports gpio:
-    gpio.gpio => self.PA[9]
-
-  supports gpio:
-    gpio.gpio => self.PA[10]
-
-  supports gpio:
-    gpio.gpio => self.PA[13]
-
-  supports gpio:
-    gpio.gpio => self.PA[14]
-
-  pcb-bundle I2C1_SDA:
-    pin p
-  pcb-bundle I2C1_SCL: 
-    pin p
-
-  supports I2C1_SCL:
-    I2C1_SCL.p => self.PA[9]
-  supports I2C1_SDA:
-    I2C1_SDA.p => self.PA[10]
-  supports i2c:
-    require sda-pin: I2C1_SDA
-    require scl-pin: I2C1_SCL
-    i2c.sda => sda-pin.p
-    i2c.scl => scl-pin.p
-
-  pcb-bundle SPI1_MOSI:
-    pin p
-  pcb-bundle SPI1_MISO:
-    pin p
-  pcb-bundle SPI1_SCK:
-    pin p
-  pcb-bundle SPI1_NSS:
-    pin p
-
-  supports SPI1_NSS:
-    SPI1_NSS.p => self.PA[4]
-  supports SPI1_SCK:
-    SPI1_SCK.p => self.PA[5]
-  supports SPI1_MISO:
-    SPI1_MISO.p => self.PA[6]
-  supports SPI1_MOSI:
-    SPI1_MOSI.p => self.PA[7]
-  supports spi:
-    require mosi-pin: SPI1_MOSI
-    require miso-pin: SPI1_MISO
-    require sck-pin: SPI1_SCK
-    require ss-pin: SPI1_NSS
-    spi.mosi => mosi-pin.p
-    spi.miso => miso-pin.p
-    spi.sck => sck-pin.p
-    spi.ss => ss-pin.p
-
-  pcb-bundle USART1_TX:
-    pin p
-  pcb-bundle USART1_RX:
-    pin p
-  pcb-bundle USART1_RTS:
-    pin p
-
-  supports USART1_RTS:
-    USART1_RTS.p => self.PA[1]
-  supports USART1_TX:
-    USART1_TX.p => self.PA[2]
-  supports USART1_RX:
-    USART1_RX.p => self.PA[3]
-  supports USART1_TX:
-    USART1_TX.p => self.PA[9]
-  supports USART1_RX:
-    USART1_RX.p => self.PA[10]
-  supports USART1_TX:
-    USART1_TX.p => self.PA[14]
-  supports uart-with([`rts]):
-    require tx-pin: USART1_TX
-    require rx-pin: USART1_RX
-    require rts-pin: USART1_RTS
-    uart-with([`rts]).tx => tx-pin.p
-    uart-with([`rts]).rx => rx-pin.p
-    uart-with([`rts]).rts => rts-pin.p
-
-  pcb-bundle RCC_OSC_IN: 
-    pin p
-  pcb-bundle RCC_OSC_OUT: 
-    pin p
-
-  supports RCC_OSC_IN:
-    RCC_OSC_IN.p => self.PF[0]
-  supports RCC_OSC_OUT:
-    RCC_OSC_OUT.p => self.PF[1]
-
-  supports high-freq-oscillator:
-    require in-pin: RCC_OSC_IN
-    require out-pin: RCC_OSC_OUT
-    high-freq-oscillator.in => in-pin.p
-    high-freq-oscillator.out => out-pin.p
+  ocdb/components/STM32F031F_4-6_Px/supports/make-supports()
 
 public pcb-module module (options:Tuple<KeyValue<Symbol,?>>) :
   ;Overwrite with users options
@@ -194,3 +63,6 @@ public pcb-module module (options:Tuple<KeyValue<Symbol,?>>) :
   set-boot(mcu, settings[`boot-from])
   connect-debug(mcu, settings[`debug-interface], settings[`debug-connector])
   setup-clocks(mcu, settings[`HSE-freq], settings[`HSE-ppm], settings[`HSE-source], settings[`LSE-freq], settings[`LSE-ppm], settings[`LSE-source])
+
+
+val design = make-default-board(module([]), 4, 10.0, 10.0)

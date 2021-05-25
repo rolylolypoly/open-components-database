@@ -26,7 +26,8 @@ public pcb-bundle SPST :
   pin p
   pin t
 
-public pcb-bundle power :  pin vdd
+public pcb-bundle power :  
+  pin vdd
   pin gnd
 
 public pcb-bundle fpga-diff : 
@@ -153,7 +154,7 @@ public pcb-bundle high-freq-oscillator :
   pin out
 
 public pcb-bundle i2s (mclk?:True|False, duplex?:True|False):
-  pin blck
+  pin bclk
   pin ws
   if mclk?:
     pin mclk
