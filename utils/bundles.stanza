@@ -164,17 +164,6 @@ public pcb-bundle i2s (mclk?:True|False, duplex?:True|False):
   else:
     pin sd
 
-public pcb-bundle i2s (mclk?:True|False, duplex?:True|False):
-  pin blck
-  pin ws
-  if mclk?:
-    pin mclk
-  if duplex?:
-    pin sdi
-    pin sdo
-  else:
-    pin sd
-
 public pcb-bundle jtag-4: 
   pin tck
   pin tdi
