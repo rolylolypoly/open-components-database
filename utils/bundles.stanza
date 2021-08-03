@@ -22,10 +22,6 @@ public pcb-bundle diff-pair :
 public pcb-bundle lvds : 
   diff-pair-pins()
 
-public pcb-bundle SPST :
-  pin p
-  pin t
-
 public pcb-bundle power :
   pin vdd
   pin gnd
@@ -68,18 +64,25 @@ public pcb-bundle i2c :
   pin scl
 
 public pcb-bundle can :
-  pin canh
-  pin canl
+  diff-pair-pins ()
 
 public pcb-bundle can-interface :
   pin rx
   pin tx
 
-public pcb-bundle swd:
+public pcb-enum ocdb/bundles/SWDPins :
+  SWD-RST
+
+public pcb-bundle swd (pins:Tuple<SWDPins>):
   pin swdio
   pin swdclk
+  for p in pins do :
+    switch(p) :
+      SWD-RST : make-pin(`rst)
 
 public pcb-enum ocdb/bundles/UARTPins :
+  UART-RXD
+  UART-TXD
   UART-DTR
   UART-CTS
   UART-DCD
@@ -95,6 +98,8 @@ public pcb-bundle uart (pins:Tuple<UARTPins>) :
   pin tx
   for p in pins do :
     switch(p) :
+      UART-RXD : make-pin(`rx)
+      UART-TXD : make-pin(`tx)
       UART-DTR : make-pin(`dtr)
       UART-CTS : make-pin(`cts)
       UART-DCD : make-pin(`dcd)
@@ -106,13 +111,13 @@ public pcb-bundle uart (pins:Tuple<UARTPins>) :
       UART-CS : make-pin(`cs)
 
 public defn uart ():
-  uart([])
+  uart([UART-RXD UART-TXD])
 
 public pcb-bundle usart (pins:Tuple<ocdb/bundles/UARTPins>) :
-  pin rx
-  pin tx
   for p in pins do :
     switch(p) :
+      UART-RXD : make-pin(`rx)
+      UART-TXD : make-pin(`tx)
       UART-DTR : make-pin(`dtr)
       UART-CTS : make-pin(`cts)
       UART-DCD : make-pin(`dcd)
@@ -124,7 +129,7 @@ public pcb-bundle usart (pins:Tuple<ocdb/bundles/UARTPins>) :
       UART-CS : make-pin(`cs)
 
 public defn usart ():
-  usart([])
+  usart([UART-RXD UART-TXD])
 
 public pcb-enum ocdb/bundles/SPIPins :
   SPI-CS
@@ -132,7 +137,7 @@ public pcb-enum ocdb/bundles/SPIPins :
   SPI-COPI
   SPI-SDIO
 
-public pcb-bundle spi  (pins:Tuple<SPIPins>):
+public pcb-bundle spi (pins:Tuple<SPIPins>):
   pin sck
   for p in pins do :
     switch(p) :
@@ -148,15 +153,29 @@ public defn spi ():
 public pcb-bundle quad-spi :
   port sdio : pin[4]
   pin sck
-  pin cs
+  for p in pins do :
+    switch(p) :
+      SPI-CS  : make-pin(`cs)
+      
+public pcb-bundle dual-spi :
+  port sdio : pin[2]
+  pin sck
+  for p in pins do :
+    switch(p) :
+      SPI-CS  : make-pin(`cs)
 
-public pcb-bundle usb-2-data:
+public pcb-enum ocdb/bundles/USBPins :
+  USB-ID
+  USB-VDD
+  USB-GND
+
+public pcb-bundle usb (pins:Tuple<USBPins>)::
   diff-pair-pins()
-
-public pcb-bundle usb-2 :
-  port data : usb-2-data
-  port vbus : power
-  pin id
+  for p in pins do :
+    switch(p) :
+      USB-ID  : make-pin(`id)
+      USB-VDD  : make-pin(`vdd)
+      USB-GND  : make-pin(`gnd)
 
 public pcb-bundle rgmii :
   port txd : pin[4]
@@ -173,23 +192,14 @@ public pcb-bundle trd :
   port trd : diff-pair
   pin common
 
-public pcb-bundle rgb-led :
-  pin r
-  pin g
-  pin b
-  pin a
+public pcb-enum ocdb/bundles/OscillatorPins :
+  OSC-OSCOUT
 
-public pcb-bundle crystal :
-  pin in
-  pin out
-
-public pcb-bundle low-freq-oscillator :
-  pin in
-  pin out
-
-public pcb-bundle high-freq-oscillator : 
-  pin in
-  pin out
+public pcb-bundle oscillator (pins:Tuple<SPIPins>):
+  pin oscin
+  for p in pins do :
+    switch(p) :
+        OSC-OSCOUT : make-pin(`oscout)
 
 public pcb-bundle rs485 :
   pin b
