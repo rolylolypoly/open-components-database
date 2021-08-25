@@ -59,6 +59,15 @@ pcb-module first-design :
   add-mounting-holes(board-shape, "M2", [2 3])
   place(connector.connector) at loc(-4.0, -12.5) on Top
 
+  ;schematic-group(stm) = stm
+  ;schematic-group([stm.hf-xtal, stm.losc]) = stm.crystal
+  schematic-group-order = (stm.stm, stm.stm.crystal)
+  ; - reserve space for title block
+  ; - go to max sheet size if needed
+  ; - put sheets area around sheets in darker gray in visualizer
+  ; - generate titles for sheets being the list of finer grain schematic group in them (enumerate 1, 2, 3... if they extend on several sheets)
+  ; - order to dispatch on sheet, try to put all group on sheet 1, if fails, try to put its 1st sub-group, if can't go down another level (etc) else try to put 2nd sub-group on sheet 1...
+
   ; Run the schematic review 
   check-design(self)
 

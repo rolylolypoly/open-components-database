@@ -157,6 +157,7 @@ public defn connect-debug (stm:JITXObject, debug-interface:PortType, connector:I
       require debug-m:debug-interface from stm
       require debug-c:debug-interface from debug-con
       net DEBUG (debug-m debug-c)
+      println("schematic-group(debug-con) = debug")
       schematic-group(debug-con) = debug
       if has-port?(debug-con, "power") :
         net (debug-con.power.vdd, power-pins(stm)[0])
@@ -195,6 +196,7 @@ public defn setup-clocks (stm:JITXObject, HSE-freq:Double, HSE-ppm:Double, HSE-s
           net (hf-osc.out hf-xtal.p[2])
           val hf-cb = add-xtal-caps(hf-xtal, gnd-pin)
           check-oscillator(hf-xtal, CrystalOscillator(2.0e-3, 100.0e-6, 3.0e-12, HSE-ppm * HSE-freq, HSE-freq), hf-cb)
+          schematic-group(hf-xtal) = clock
         "osc" :
           if HSE-ppm > 25.0e-6 :
             require hf-osc:high-freq-oscillator from stm
@@ -202,6 +204,7 @@ public defn setup-clocks (stm:JITXObject, HSE-freq:Double, HSE-ppm:Double, HSE-s
             net (hf-osc.in osc.out)
             net (osc.power.gnd, gnd-pin)
             net (osc.power.vdd, power-pin)
+            schematic-group(osc) = clock
           else : 
             println("MEMS oscillators in library can't meet ppm. Try a 'crystal' source.")
     if supports?(instantiable-type(stm), low-freq-oscillator) and LSE-ppm < 0.03 :
@@ -214,6 +217,7 @@ public defn setup-clocks (stm:JITXObject, HSE-freq:Double, HSE-ppm:Double, HSE-s
             net (lf-osc.out losc.p[2])
             val lf-cb = add-xtal-caps(losc, gnd-pin)
             check-oscillator(losc, CrystalOscillator(3.1e-6, 0.5e-6, 4.0e-12, 50.0e-6 * 32.768e3, 32.768e3), lf-cb)
+            schematic-group(losc) = clock
           else:
             println("Unsupported frequency for LSE: %_. Try 32.768e3." % [LSE-freq])
         else:
