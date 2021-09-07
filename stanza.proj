@@ -1,3 +1,4 @@
+package ocdb/solvers/fet-test-db defined-in "modules/fet-test-db.stanza"
 ;====================================
 ; Land pattern and symbol utilities 
 ;====================================

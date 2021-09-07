@@ -1,0 +1,33 @@
+#use-added-syntax(jitx)
+defpackage ocdb/diodes-incorporated/ZVP3310A :
+  import core
+  import collections
+  import math
+  import jitx
+  import jitx/commands
+  import ocdb/defaults
+
+  import ocdb/land-patterns 
+  import ocdb/symbols
+  import ocdb/box-symbol
+  import ocdb/bundles
+  import ocdb/generator-utils
+  import ocdb/generic-components
+
+public pcb-component component :
+  manufacturer = "Diodes Incorporated"
+  description = "MOSFET P-CH 100V 140MA TO92-3"
+  mpn = "ZVP3310A"
+  ; reference-prefix = "Q"
+  pin g
+  pin d
+  pin s
+
+  val pkg = TO-092()
+  val sym = fet-sym("p-type", "enhancement", false)
+  landpattern = pkg(d => pkg.p[1], g => pkg.p[2], s => pkg.p[3])
+  symbol = sym(g => sym.g, d => sym.d, s => sym.s)
+  reference-prefix = "Q"
+
+public pcb-module module :
+  inst c : component

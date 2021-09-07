@@ -1,0 +1,67 @@
+#use-added-syntax(jitx)
+defpackage ocdb/solvers/fet-test-db:
+  import core
+  import collections
+  import math
+  import jitx
+  import jitx/commands
+  import ocdb/defaults
+  import ocdb/generic-components
+  import ocdb/generator-utils
+  import ocdb/checks
+  import ocdb/design-vars
+  import ocdb/db-parts
+
+
+pcb-component to-esir (fet1:FET): 
+  ;https://www.digikey.com/en/products/detail/microchip-technology/TP2435N8-G/4902961
+  manufacturer = "Microchip Technology"
+  mpn = "TP2435N8-G"
+;   trust = 
+;   x = 0.1
+;   y = 0.1
+;   z = 0.1
+;   mounting = "smd"
+;   rated-temperature = [-55, 150.0] 
+;   case = "TO-243AA"
+  ; sourcing = 
+  ; metadata = 
+  ; FET specific properties
+  channel = "P"
+  ; standards = 
+  technology = "Metal Oxide"
+  vdss = 350.0
+  id-25c = 0.231
+  id-25c-temperature = "Tj"
+  vgsth = 2.4
+  id-vgsth = 0.001
+  vgs-max = 20.0
+  rds-on-max = 15.0
+  rds-on-max-i = 0.5
+  rds-on-max-vgs = 10.0
+  ; fet-features = 
+  ; power-dissipation-max-case = 
+  power-dissipation-max-ambient = 1.6
+  ; qg-max = 
+  ; qg-voltage = 
+  ; values in datasheets, not parameters:
+  ids-off = False
+  ids-off-high-temperature = False
+  temperatre-of-ids-off-high-temperature = False
+  igs-off = False 
+  pin g
+  pin d
+  pin s
+  
+  val pkg = TO-092()
+  val sym = fet-sym("p-type", "enhancement", false)
+  landpattern = pkg(d => pkg.p[1], g => pkg.p[2], s => pkg.p[3])
+  symbol = sym(g => sym.g, d => sym.d, s => sym.s)
+  reference-prefix = "Q"
+
+public defn fet-lookup (mpn:String): 
+  val db = [
+    FET(fet1)
+
+  ]
+  find({/mpn(_) == mpn}, db)

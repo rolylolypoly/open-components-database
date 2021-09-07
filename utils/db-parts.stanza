@@ -264,7 +264,7 @@ public defn Capacitor (raw-json: JObject) -> Capacitor :
             optional-string(json, "case"),
             parse-sourcing(json),
             entries(json["metadata"] as JObject),
-            ; Resistor specific properties
+            ; Capacitor specific properties
             json["type"] as String,
             parse-tolerance(json),
             json["capacitance"] as Double,
@@ -408,7 +408,92 @@ public defn Capacitor (properties:Tuple<KeyValue>, exist:Tuple<String>, sort:Tup
   val json = dbquery-first(query-properties) as JObject
   Capacitor(json)
   ; Capacitor("manufacturer", "mpn", "trust", 0.0, 0.0, 0.0, "mounting", false, false, Sourcing(false, 0, 0), [], "ceramic", false, 0.0, false, false, false, false, false, false, false)
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~```~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+;============================================================
+;===================== FET ============================
+;============================================================
 
+public defstruct FET <: Component :
+  ; Generic properties
+  manufacturer: String
+  mpn: String
+  ; trust: String
+  ; x: Double with: (as-method => true)
+  ; y: Double with: (as-method => true)
+  ; z: Double|False
+  ; mounting: String
+  ; rated-temperature: MinMaxRange|False
+  ; case: String|False
+  ; sourcing: Sourcing
+  ; metadata: Tuple<KeyValue>
+  ; FET specific properties
+  channel: String ; N or P channel
+  standards: String|False ; Various Automotive or Military Quality Standards, some are specific to FETs
+  technology: String ; FET type (MOSFET, Gallium Nitride, etc.)
+  vdss: Double ; Drain to Source Voltage
+  id-25c: Double ; Current - Continuous Drain (Id) @ 25°C, in Amps
+  id-25c-temperature: String|False ; Temperature setting for id
+  vgsth: Double ; Vgs(th) (Max) Max voltage gate to source that will turn "on" the FET
+  id-vgsth: Double ; Drain current for VGS(th) max to be true
+  vgs-max: Double ; voltage max between gate and source
+  rds-on-max: Double ; Resistance between source and drain at current and gate voltage
+  rds-on-max-i: Double; Current when Rdson is measured
+  rds-on-max-vgs: Double ; Voltage gate to source when Rds ON @ Id is taken
+  fet-features: String|False ; FET Features
+  power-dissipation-max-case: Double|False ; @ Tc (case temperature) - heatsink or fan
+  power-dissipation-max-ambient: Double|False ; @ Ta (ambient temperature), if no specification, assume Ta
+  qg-max:Double|False ; gate charge in Coulombs
+  qg-voltage:Double|False ; voltage for gate charge measurement
+  ; values in datasheets, not parameters:
+  ids-off: Double|False ; Current drain to source off leak current
+  ids-off-high-temperature: Double|False ; Current drain to source off leak current at high temperature
+  temperatre-of-ids-off-high-temperature: Double|False ; Temperature of ids off (typically 125 C)
+  igs-off:Double|False ; gate to source leakage current
+
+  ; SKIP: packaging, part status (handled other ways), Supplier device package, Exclude marketplace
+  ; SKIP:  Input Capacitance (Ciss) (Max) @ Vds, media, environmental options, 
+  ; TODO: look at various datasheets for more params
+  ; TODO: look at different MOSFET uses and move up skipped portions to tuple
+
+public defn FET (raw-json: JObject) -> FET :
+  val json = filter-json(raw-json)
+  val [x, y, z] = parse-dimensions(json["dimensions"] as JObject)
+
+  FET(json["manufacturer"] as String,
+            json["mpn"] as String,
+            ; json["trust"] as String,
+            ; x,
+            ; y,
+            ; z,
+            json["mounting"] as String,
+            parse-rated-temperature(json),
+            optional-string(json, "case"),
+            ; parse-sourcing(json),
+            ; entries(json["metadata"] as JObject),
+            ; FET specific properties
+            json["channel"] as String,
+            optional-string(json, "standards"), 
+            json["technology"] as String,
+            json["vdss"] as Double,
+            json["id-25c"] as Double,
+            optional-string(json, "id-25c-temperature"),
+            json["vgsth"] as Double,
+            json["id-vgsth"] as Double,
+            json["vgs-max"] as Double,
+            json["rds-on-max"] as Double,
+            json["rds-on-max-i"] as Double,
+            json["rds-on-max-vgs"] as Double,
+            optional-string(json, "fet-features"),
+            optional-double(json, "power-dissipation-max-case"),
+            optional-double(json, "power-dissipation-max-ambient"),
+            optional-double(json, "qg-max"),
+            optional-double(json, "qg-voltage"),
+            ; values in datasheets
+            optional-double(json, "ids-off"),
+            optional-double(json, "ids-off-high-temperature"),
+            optional-double(json, "temperatre-of-ids-off-high-temperature"),
+            optional-double(json, "igs-off"))
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~```~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ;============================================================
 ;====================== Inductor ============================
 ;============================================================

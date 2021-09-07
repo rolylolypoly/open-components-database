@@ -1619,7 +1619,7 @@ public defn make-two-pin-chip-landpattern (length:Toleranced,
                                            polarized?:True|False):
   make-two-pin-chip-landpattern(
     length, width, lead-length, lead-width?, 
-    density-level, polarized?, polarized?
+    density-level, polarized?, polarized? ; THIS LOOKS WRONG IS POLARIZED HERE TWICE?=================================================================================
   )
 
 public defn make-two-pin-chip-landpattern (length:Toleranced,
@@ -1764,6 +1764,86 @@ public defn make-two-pin-radial-landpattern (component-length:Toleranced, ; the 
     if polarized?:
       two-pin-th-polarity-marker(Dims(max-value(component-length), max-value(component-width)), 
                                  pad-diameter, lead-spacing)
+
+public pcb-landpattern TO-092 ():
+  make-jedec-toxxx-landpattern(092)
+
+public defn make-jedec-toxxx-landpattern (tonum:Int): ; TO# of component, example: TO092
+  make-th-circle-with-flat-landpattern(tol(5.08, 0.12),        ; component-diameter:Toleranced, ;
+                                       tol(4.06,0.08),     ; component-flat-to-arc:Toleranced
+                                      ;  3.43 ; j 
+                                            ; ; component-plane-height ;
+                                            ; component-standoff-height:Toleranced,
+                                       1.27,     ; component-lead-length-one:Toleranced
+                                       6.35,     ; component-lead-length-two:Toleranced
+                                       12.7,     ; component-lead-length-total:Toleranced
+                                       tol(0.4445, 0.0375),     ; component-lead-diameter-two:Toleranced
+                                       tol(0.47,0.063),     ; component-lead-diameter-diameter:Toleranced
+                                       1.27,     ; lead-spacing:Toleranced,     ;
+                                       tol(0.0,0.0),     ; standoff-height:Toleranced, ;
+                                       Rectangle(3.0,5.0),     ; bottom-courtyard:Shape, ;
+                                       DensityLevelC     ); density-level:DensityLevel) :
+public defn make-th-circle-with-flat-landpattern (
+  ; help-link = https://docs.jitx.com/help?url="https://www.jedec.org/sites/default/files/docs/archive/to/to-092.pdf"
+                                            component-diameter:Toleranced, ; JEDEC symbol D, package diameter
+                                            component-flat-to-arc:Toleranced, ; JEDEC symbol E, the length from the flat side of the package to the outermost end of the diameter
+                                            ; component-flat-min:Double, ; JEDEC symbol j, the min length of the flat
+                                            ; component-plane-height ; the height of the body of the component from the component seating plane, does not include standoff height
+                                            ; component-standoff-height:Toleranced, ; the standoff height of the component
+                                            component-lead-length-one-max:Double, ; JEDEC symbol l1, the length of the lead from the seating plane to diameter change 1
+                                            component-lead-length-two-min:Double, ; JEDEC symbol l2, the length of the lead from the seating plane to diameter change 2
+                                            component-lead-length-total-min:Double, ; JEDEC symbol l, the total length of the lead from the seating plane
+                                            component-lead-diameter-two:Toleranced, ; JEDEC symbol b2, the diameter of the lead from the seating plane to diameter change 2
+                                            component-lead-diameter-end:Toleranced, ; JEDEC symbol b2, the diameter of the lead from the diameter change 2 to the end of the lead, the diameter of l1 is not controlled
+                                            lead-spacing:Double,     ; JEDEC symbol e1, the distance between each lead
+                                            standoff-height:Toleranced, ; the height of an aftermarket standoff
+                                            bottom-courtyard:Shape, ; the shape of the bottom side courtyard
+                                            density-level:DensityLevel) : ; the density level of the design
+
+  inside pcb-landpattern:
+    ;------------------------------------------------------------
+    ; Validate inputs
+    if (component-lead-length-one-max >=  component-lead-length-two-min) :
+      fatal("component-lead-length-one-max (%_) must be smaller than component-lead-length-two-min (%_) " % [to-string(component-lead-length-one-max) to-string(component-lead-length-two-min)])
+    if (component-lead-length-two-min >= component-lead-length-total-min  ) :
+      fatal("component-lead-length-two-min (%_) must be smaller than component-lead-length-total-min (%_) " % [to-string(component-lead-length-two-min) to-string(component-lead-length-total-min)])
+    if (component-lead-length-two-min >= component-lead-length-total-min  ) :
+      fatal("component-flat-to-arc (%_) must be smaller than component-diameter (%_) " % [to-string(component-flat-to-arc) to-string(component-diameter)])
+    if (min-value(component-lead-diameter-two) >= max-value(component-lead-diameter-end)  ) :
+      fatal("min of component-lead-diameter-two (%_) must be smaller than max of component-lead-diameter-end (%_) " % [to-string(min-value(component-lead-diameter-two)) to-string(max-value(component-lead-diameter-end))])
+    
+    ;------------------------------------------------------------
+    ; Compute the pad definition
+    val [pad-diameter, hole-diameter] = pth-pad-sizes(component-lead-diameter-two, density-level)
+    val pad-def = pth-pad(hole-diameter * 0.5, pad-diameter * 0.5)
+
+    ;------------------------------------------------------------
+    ; Place the pads
+    pad p[1]: pad-def at loc(0.0, (-1.0 * lead-spacing))
+    pad p[2]: pad-def at loc(0.0, 0.0)
+    pad p[3]: pad-def at loc(0.0, lead-spacing)
+    
+    ;------------------------------------------------------------
+    ; Compute the courtyard
+    ; assume flat length is not true and we only know E
+    val courtyard-excess = 0.75
+    val component-max-radius = (max-value(component-diameter) / 2.0) ;+ courtyard-excess
+    val flat-x-position =  component-max-radius - max-value(component-flat-to-arc) ;- courtyard-excess; 4.06 - 5.08/2 ~ 1.5
+    val angle-rad = acos(flat-x-position / component-max-radius)
+    val angle = to-degrees(angle-rad)
+    val flat-y-position = component-max-radius * sin(angle-rad)
+    ; print(to-string("flat-x-position %_ flat-y-position %_ \n" % [to-string(flat-x-position) to-string(flat-y-position)]))
+    val start-point = Point(flat-x-position, flat-y-position)
+    val end-point = Point(flat-x-position, -1.0 * flat-y-position)
+    val start-angle = to-degrees(atan(flat-y-position / flat-x-position))
+    val end-angle = to-degrees(atan(-1.0 * flat-y-position / flat-x-position))
+    ; print(to-string("angle %_ start angle %_ end angle %_ \n" % [to-string(angle) to-string(start-angle) to-string(end-angle)]))
+    layer(Courtyard(Top))    = Rectangle(max-value(component-diameter) + 2.0 * courtyard-excess,max-value(component-diameter) + 2.0 * courtyard-excess ) 
+    layer(Courtyard(Bottom)) = bottom-courtyard ; Rectangle(pads area + SMT-to-th-expansion rule) ; TODO: make this real
+    val min-silkscreen-width = clearance(current-rules(), MinSilkscreenWidth)
+    val min-silkscreen-text-height = clearance(current-rules(), MinSilkscreenTextHeight)
+    layer(Silkscreen("F-SilkS", Top)) = Polyline(min-silkscreen-width, [Arc(0.0,0.0, component-max-radius  , angle,  (-2.0 * angle)) start-point])
+    ref-label(loc(flat-x-position - 0.5 * (min-silkscreen-text-height) , 0.0,  90.0))
 
 ; Generate a land pattern for a two-pin axial through hole component
 public defn make-two-pin-axial-landpattern (component-length:Toleranced,   ; The length of the component
