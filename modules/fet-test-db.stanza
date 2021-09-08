@@ -13,17 +13,17 @@ defpackage ocdb/solvers/fet-test-db:
   import ocdb/db-parts
 
 
-pcb-component to-esir (fet1:FET): 
+pcb-component to-esir (fet:FET): 
   ;https://www.digikey.com/en/products/detail/microchip-technology/TP2435N8-G/4902961
   manufacturer = "Microchip Technology"
   mpn = "TP2435N8-G"
 ;   trust = 
-;   x = 0.1
-;   y = 0.1
-;   z = 0.1
-;   mounting = "smd"
-;   rated-temperature = [-55, 150.0] 
-;   case = "TO-243AA"
+  x = 0.1
+  y = 0.1
+  z = 0.1
+  mounting = "smd"
+  rated-temperature = [-55, 150.0] 
+  case = "TO-243AA"
   ; sourcing = 
   ; metadata = 
   ; FET specific properties
