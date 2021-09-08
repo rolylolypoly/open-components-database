@@ -37,7 +37,7 @@ public defn pfet-switch (in:JITXObject, gate:JITXObject, switched:JITXObject,
                              mounting: String|False, ; "smd" "th" "press-fit"
                              optimize-for: String ; cost, on resistance, off leakage, area, weight, 
                              ) -> VoltageDividerSolution|False:
-; Optimize for: on leakage, off leakage, Rds-on, 
+; Optimize for: cost, off leakage, Rds-on, 
 
 ; Filter columns available: https://www.digikey.com/en/products/filter/transistors-fets-mosfets-single/278
 ; filter in stock, active = true, exclude marketplace product

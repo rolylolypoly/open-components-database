@@ -11,57 +11,137 @@ defpackage ocdb/solvers/fet-test-db:
   import ocdb/checks
   import ocdb/design-vars
   import ocdb/db-parts
+  import ocdb/land-patterns
+  import ocdb/symbols
+; mike's suggested way of creating a small db
+pcb-enum  ocdb/fet-database/FetType:
+  MOSFET
+  ; JFET
 
+pcb-enum  ocdb/fet-database/FetChannel:
+  PChannel
+  NChannel
 
-pcb-component to-esir (fet:FET): 
-  ;https://www.digikey.com/en/products/detail/microchip-technology/TP2435N8-G/4902961
-  manufacturer = "Microchip Technology"
-  mpn = "TP2435N8-G"
-;   trust = 
-  x = 0.1
-  y = 0.1
-  z = 0.1
-  mounting = "smd"
-  rated-temperature = [-55, 150.0] 
-  case = "TO-243AA"
-  ; sourcing = 
-  ; metadata = 
-  ; FET specific properties
-  channel = "P"
-  ; standards = 
-  technology = "Metal Oxide"
-  vdss = 350.0
-  id-25c = 0.231
-  id-25c-temperature = "Tj"
-  vgsth = 2.4
-  id-vgsth = 0.001
-  vgs-max = 20.0
-  rds-on-max = 15.0
-  rds-on-max-i = 0.5
-  rds-on-max-vgs = 10.0
-  ; fet-features = 
-  ; power-dissipation-max-case = 
-  power-dissipation-max-ambient = 1.6
-  ; qg-max = 
-  ; qg-voltage = 
-  ; values in datasheets, not parameters:
-  ids-off = False
-  ids-off-high-temperature = False
-  temperatre-of-ids-off-high-temperature = False
-  igs-off = False 
+; First let's define our FET database as a vector of objects
+val FET-DB = Vector<JITXDef>()
+
+; Now we want to query it based on some properties,
+public defn lookup-fet? (
+  query: (JITXDef) -> True|False, ; we'll pass in a callback function as an argument
+) -> Seq<JITXDef>: ; this function returns a sequence, which may be empty. 
+  filter(query, FET-DB)
+
+; Say we want the first FET that fits our query
+public defn lookup-fet! (
+  finder: (JITXDef) -> True|False,
+) -> JITXDef: 
+  next(lookup-fet?(finder))
+
+; filter P-Channel FETs channel="P"
+; filter id >= i-ds ; id-25c >= 0.075
+; filter Vds >v-bus max vdss > 5.0
+; filter Vgth < Vbus-min ; vgsth < ? AND id-vgsth < i-out-min
+
+; if optimize for cost
+; sort by cost, pick lowest cost item
+
+; if optimize by on leakage
+; sort by Rds On (max), pick smallest value
+
+; if optimize by off leakage
+; fort by off leakage and pick smallest value
+
+; Let's make some FETs
+pcb-component F1: 
   pin g
-  pin d
   pin s
-  
+  pin d
   val pkg = TO-092()
   val sym = fet-sym("p-type", "enhancement", false)
   landpattern = pkg(d => pkg.p[1], g => pkg.p[2], s => pkg.p[3])
   symbol = sym(g => sym.g, d => sym.d, s => sym.s)
   reference-prefix = "Q"
+  property(self.channel-type) = PChannel
+  property(self.fet-type) = MOSFET
+  property(self.id-25c) = 12.5
+  property(self.vdss) = 20.2
+  ; vgsth
+  ; id-vgsth
 
-public defn fet-lookup (mpn:String): 
-  val db = [
-    FET(fet1)
+pcb-component F2: 
+  pin g
+  pin s
+  pin d
+  val pkg = TO-092()
+  val sym = fet-sym("n-type", "enhancement", false)
+  landpattern = pkg(d => pkg.p[1], g => pkg.p[2], s => pkg.p[3])
+  symbol = sym(g => sym.g, d => sym.d, s => sym.s)
+  reference-prefix = "Q"
+  property(self.channel-type) = NChannel
+  property(self.fet-type) = MOSFET
+  property(self.id-25c) = 12.5
+  property(self.vdss) = 20.2
+  ; vgsth
+  ; id-vgsth
 
-  ]
-  find({/mpn(_) == mpn}, db)
+
+; now we can add them to the vector
+add(FET-DB, F1)
+add(FET-DB, F2)
+; add(FET-DB, F3)
+
+; Optimize for: cost, off leakage, Rds-on
+
+
+; pcb-component to-esir (fet1:FET): 
+;   ;https://www.digikey.com/en/products/detail/microchip-technology/TP2435N8-G/4902961
+;   manufacturer = "Microchip Technology"
+;   mpn = "TP2435N8-G"
+; ;   trust = 
+;   x = 0.1
+;   y = 0.1
+;   z = 0.1
+;   mounting = "smd"
+;   rated-temperature = [-55, 150.0] 
+;   case = "TO-243AA"
+;   ; sourcing = 
+;   ; metadata = 
+;   ; FET specific properties
+;   channel = "P"
+;   ; standards = 
+;   technology = "Metal Oxide"
+;   vdss = 350.0
+;   id-25c = 0.231
+;   id-25c-temperature = "Tj"
+;   vgsth = 2.4
+;   id-vgsth = 0.001
+;   vgs-max = 20.0
+;   rds-on-max = 15.0
+;   rds-on-max-i = 0.5
+;   rds-on-max-vgs = 10.0
+;   ; fet-features = 
+;   ; power-dissipation-max-case = 
+;   power-dissipation-max-ambient = 1.6
+;   ; qg-max = 
+;   ; qg-voltage = 
+;   ; values in datasheets, not parameters:
+;   ids-off = False
+;   ids-off-high-temperature = False
+;   temperatre-of-ids-off-high-temperature = False
+;   igs-off = False 
+;   pin g
+;   pin d
+;   pin s
+  
+;   val pkg = TO-092()
+;   val sym = fet-sym("p-type", "enhancement", false)
+;   landpattern = pkg(d => pkg.p[1], g => pkg.p[2], s => pkg.p[3])
+;   symbol = sym(g => sym.g, d => sym.d, s => sym.s)
+;   reference-prefix = "Q"
+
+; public defn fet-lookup (mpn:String): 
+;   val db = [
+;     FET(fet1)
+
+;   ]
+;   find({/mpn(_) == mpn}, db)
