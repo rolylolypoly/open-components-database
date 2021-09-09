@@ -62,6 +62,7 @@ pcb-component F1:
   symbol = sym(g => sym.g, d => sym.d, s => sym.s)
   reference-prefix = "Q"
   mpn = "TP2435N8-G"
+  ; https://www.digikey.com/en/products/detail/microchip-technology/TP2435N8-G/4902961
   property(self.mfg) = "Microchip"
   ; property(self.mpn) = mpn
   property(self.channel-type) = PChannel
@@ -73,6 +74,7 @@ pcb-component F1:
   property(self.cost) = 1.32
   property(self.rds-on-max) = 15.0
   property(self.ids-off) = 10.0e-6
+  property(self.igs-off) = 100.0e-9
   property(self.vgs-max) = 20.0
 
 pcb-component F2: 
@@ -85,6 +87,7 @@ pcb-component F2:
   symbol = sym(g => sym.g, d => sym.d, s => sym.s)
   reference-prefix = "Q"
   mpn = "BSP230,135"
+  ; https://www.digikey.com/en/products/detail/nexperia-usa-inc/BSP230-135/1155076
   property(self.mfg) = "Nexperia"
   ; property(self.mpn) = mpn
   property(self.channel-type) = PChannel
@@ -96,13 +99,91 @@ pcb-component F2:
   property(self.cost) = 0.431
   property(self.rds-on-max) = 17.0
   property(self.ids-off) = 100.0e-9
+  property(self.igs-off) = 100.0e-9
   property(self.vgs-max) = 20.0
 
+pcb-component F3: 
+  pin g
+  pin s
+  pin d
+  val pkg = TO-092()
+  val sym = fet-sym("n-type", "enhancement", false)
+  landpattern = pkg(d => pkg.p[1], g => pkg.p[2], s => pkg.p[3])
+  symbol = sym(g => sym.g, d => sym.d, s => sym.s)
+  reference-prefix = "Q"
+  mpn = "BTPH1R712MD,L1Q"
+  ; https://www.digikey.com/en/products/detail/toshiba-semiconductor-and-storage/TPH1R712MD-L1Q/5323102
+  ; https://toshiba.semicon-storage.com/info/docget.jsp?did=14889&prodName=TPH1R712MD
+  property(self.mfg) = "Toshiba"
+  ; property(self.mpn) = mpn
+  property(self.channel-type) = PChannel
+  ; property(self.fet-type) = MOSFET
+  property(self.id-25c) = 60.0
+  property(self.vdss) = 20.0
+  property(self.vgsth) = 1.2
+  ; property(self.id-vgsth) = 
+  property(self.cost) = 0.9867
+  property(self.rds-on-max) = 1.7e-3
+  property(self.ids-off) = 10.0e-6
+  property(self.igs-off) = 0.1e-6
+  property(self.vgs-max) = 12.0
+
+pcb-component F4: 
+  pin g
+  pin s
+  pin d
+  val pkg = TO-092()
+  val sym = fet-sym("n-type", "enhancement", false)
+  landpattern = pkg(d => pkg.p[1], g => pkg.p[2], s => pkg.p[3])
+  symbol = sym(g => sym.g, d => sym.d, s => sym.s)
+  reference-prefix = "Q"
+  mpn = "TP2635N3-G"
+  ; https://www.digikey.com/en/products/detail/microchip-technology/TP2635N3-G/4902387
+  property(self.mfg) = "Microchip"
+  ; property(self.mpn) = mpn
+  property(self.channel-type) = PChannel
+  ; property(self.fet-type) = MOSFET
+  property(self.id-25c) = 0.180
+  property(self.vdss) = 350.0
+  property(self.vgsth) = 2.0
+  ; property(self.id-vgsth) = 
+  property(self.cost) = 1.43
+  property(self.rds-on-max) = 15.0
+  property(self.ids-off) = 10.0e-6
+  property(self.igs-off) = 100.0e-9
+  property(self.vgs-max) = 20.0
+
+pcb-component F5: 
+  pin g
+  pin s
+  pin d
+  val pkg = TO-092()
+  val sym = fet-sym("n-type", "enhancement", false)
+  landpattern = pkg(d => pkg.p[1], g => pkg.p[2], s => pkg.p[3])
+  symbol = sym(g => sym.g, d => sym.d, s => sym.s)
+  reference-prefix = "Q"
+  mpn = "ZVP3310A"
+; https://www.digikey.com/en/products/detail/diodes-incorporated/ZVP3310A/92627
+  property(self.mfg) = "Diodes Inc."
+  ; property(self.mpn) = mpn
+  property(self.channel-type) = PChannel
+  ; property(self.fet-type) = MOSFET
+  property(self.id-25c) = 0.140
+  property(self.vdss) = 100.0
+  property(self.vgsth) = 3.5
+  ; property(self.id-vgsth) = 
+  property(self.cost) = 0.511
+  property(self.rds-on-max) = 20.0
+  property(self.ids-off) = 1.0e-6
+  property(self.igs-off) = 20.0e-9
+  property(self.vgs-max) = 20.0
 
 ; now we can add them to the vector
 add(FET-DB, F1)
 add(FET-DB, F2)
-; add(FET-DB, F3)
+add(FET-DB, F3)
+add(FET-DB, F4)
+add(FET-DB, F5)
 
 ; Optimize for: cost, off leakage, Rds-on
 
