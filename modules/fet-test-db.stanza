@@ -14,27 +14,27 @@ defpackage ocdb/solvers/fet-test-db:
   import ocdb/land-patterns
   import ocdb/symbols
 ; mike's suggested way of creating a small db
-pcb-enum  ocdb/fet-database/FetType:
+public pcb-enum  ocdb/fet-database/FetType:
   MOSFET
   ; JFET
 
-pcb-enum  ocdb/fet-database/FetChannel:
+public pcb-enum  ocdb/fet-database/FetChannel:
   PChannel
   NChannel
 
 ; First let's define our FET database as a vector of objects
-val FET-DB = Vector<JITXDef>()
+val FET-DB = Vector<Instantiable>()
 
 ; Now we want to query it based on some properties,
 public defn lookup-fet? (
-  query: (JITXDef) -> True|False, ; we'll pass in a callback function as an argument
-) -> Seq<JITXDef>: ; this function returns a sequence, which may be empty. 
+  query: (Instantiable) -> True|False, ; we'll pass in a callback function as an argument
+) -> Seq<Instantiable>: ; this function returns a sequence, which may be empty. 
   filter(query, FET-DB)
 
 ; Say we want the first FET that fits our query
 public defn lookup-fet! (
-  finder: (JITXDef) -> True|False,
-) -> JITXDef: 
+  finder: (Instantiable) -> True|False,
+) -> Instantiable: 
   next(lookup-fet?(finder))
 
 ; filter P-Channel FETs channel="P"
@@ -61,12 +61,19 @@ pcb-component F1:
   landpattern = pkg(d => pkg.p[1], g => pkg.p[2], s => pkg.p[3])
   symbol = sym(g => sym.g, d => sym.d, s => sym.s)
   reference-prefix = "Q"
+  mpn = "TP2435N8-G"
+  property(self.mfg) = "Microchip"
+  ; property(self.mpn) = mpn
   property(self.channel-type) = PChannel
-  property(self.fet-type) = MOSFET
-  property(self.id-25c) = 12.5
-  property(self.vdss) = 20.2
-  ; vgsth
-  ; id-vgsth
+  ; property(self.fet-type) = MOSFET
+  property(self.id-25c) = 0.231
+  property(self.vdss) = 350.0
+  property(self.vgsth) = 2.4
+  ; property(self.id-vgsth) = 
+  property(self.cost) = 1.32
+  property(self.rds-on-max) = 15.0
+  property(self.ids-off) = 10.0e-6
+  property(self.vgs-max) = 20.0
 
 pcb-component F2: 
   pin g
@@ -77,12 +84,19 @@ pcb-component F2:
   landpattern = pkg(d => pkg.p[1], g => pkg.p[2], s => pkg.p[3])
   symbol = sym(g => sym.g, d => sym.d, s => sym.s)
   reference-prefix = "Q"
-  property(self.channel-type) = NChannel
-  property(self.fet-type) = MOSFET
-  property(self.id-25c) = 12.5
-  property(self.vdss) = 20.2
-  ; vgsth
-  ; id-vgsth
+  mpn = "BSP230,135"
+  property(self.mfg) = "Nexperia"
+  ; property(self.mpn) = mpn
+  property(self.channel-type) = PChannel
+  ; property(self.fet-type) = MOSFET
+  property(self.id-25c) = 0.210
+  property(self.vdss) = 300.0
+  property(self.vgsth) = 2.55
+  ; property(self.id-vgsth) = 
+  property(self.cost) = 0.431
+  property(self.rds-on-max) = 17.0
+  property(self.ids-off) = 100.0e-9
+  property(self.vgs-max) = 20.0
 
 
 ; now we can add them to the vector
