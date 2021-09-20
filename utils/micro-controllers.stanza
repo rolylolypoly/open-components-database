@@ -103,11 +103,11 @@ public defn MicroController (properties:Tuple<KeyValue>, exist:Tuple<String>) ->
 public defn MicroController (properties:Tuple<KeyValue>, exist:Tuple<String>, sort:Tuple<String>, temperature-properties:Tuple<KeyValue>) -> MicroController :
   val params = jitx-params()
   val vendors = bom-vendors(params)
-  val vendor-properties =
-    match(vendors: Tuple<String>) :
-      ["_sellers" => vendors]
-    else :
-      []
+  val vendor-properties = ["_sellers" => []]
+    ; match(vendors: Tuple<String>) :
+    ;   ["_sellers" => vendors]
+    ; else :
+    ;   []
   var query-properties = []
   if DESIGN-QUANTITY == 0:
     query-properties = to-tuple $ cat-all([["category" => "microcontroller",
@@ -120,7 +120,7 @@ public defn MicroController (properties:Tuple<KeyValue>, exist:Tuple<String>, so
     query-properties = to-tuple $ cat-all([["category" => "microcontroller",
                                             "_sort" => sort,
                                             "_exist" => exist,
-                                            "_stock" => DESIGN-QUANTITY],
+                                            "_stock" => 0],
                                           vendor-properties
                                           temperature-properties,
                                           properties])
@@ -147,7 +147,7 @@ defmethod to-jitx (mcu: MicroController) -> Instantiable :
       switch(mfg-package(mcu)) :
         ; "SO8N" : SO8N
         ; "TSSOP14" : TSSOP14
-        ; "TSSOP20" : TSSOP20
+        "TSSOP20" : TSSOP20
         "LQFP100" : LQFP100
         "LQFP128" : LQFP128
         "LQFP144" : LQFP144
